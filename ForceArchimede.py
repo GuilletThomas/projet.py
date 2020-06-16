@@ -64,7 +64,7 @@ class Archimede:
 
 
 #massevolumique,fichier,hauteureau
-calcularchimede=Archimede(860,'Cylindrical_HULL.stl',3)
+calcularchimede=Archimede(1000,'Cylindrical_HULL.stl',1)
 liste=calcularchimede.calcul()
 print("poussee d'archimede:")
 print("x:",liste[0],",","y:",liste[1],',',"z:",liste[2])
