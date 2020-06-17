@@ -21,7 +21,7 @@ def GetData(fichier):
         liste.append(M)
     print(liste)
 
-fichier=open(r"V_HULL.stl",'r')
+fichier=open(r"V_HULL_Normals_Outward.STL",'r')
 #Main(fichier)
 GetData(fichier)
 #M=numpy.array([[0,-1],[1,0]])

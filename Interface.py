@@ -46,6 +46,6 @@ class Test(QWidget):
 
 if __name__ == "__main__":
    app = QApplication([])
-   ihm = Test('Rectangular_HULL.STL')
+   ihm = Test('Rectangular_HULL_Normals_Outward.STL')
    ihm.show()
    app.exec_()

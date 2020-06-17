@@ -37,7 +37,7 @@ poids = 200
 zga = 5
 zgb = 7
 eps = 1*10**(-3)
-fichier = 'V_HULL.stl'
+fichier = 'V_HULL_Normals_Outward.stl'
 
 newZga, listeiteration, listePHI = dichotomie(zga, zgb, eps, poids, fichier)
 #print(newZga)
