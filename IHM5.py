@@ -2,15 +2,15 @@ from PySide2.QtWidgets import *
 import matplotlib.pyplot as plt
 from stl import mesh
 from mpl_toolkits import mplot3d
-
+from DichotomyOfficiel import *
 from mpl_toolkits.mplot3d import axes3d, Axes3D #car erreur "unknown projection '3d'"
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 #pour l'utilsation de Axes3D --> source "https://stackoverflow.com/questions/3810865/matplotlib-unknown-projection-3d-error"
 
 class Test(QWidget):
-    def __init__(self):
+    def __init__(self,fichier=None):
+        self.__fichier=fichier
         QWidget.__init__(self)
-
         self.fig = plt.figure()
         self.canvas = FigureCanvas(self.fig)
         ax = Axes3D(self.fig) #erreur "unknown projection '3d'"
@@ -23,32 +23,64 @@ class Test(QWidget):
         self.setMinimumSize(900, 500)
 
         self.button1 = QPushButton("Load 3D Model")
-        self.button2 = QPushButton("Load Image")
+        self.button2 = QPushButton("Load Graph")
         self.button3 = QPushButton("Compute")
-
+        self.label1=QLabel("Niveau d'eau initial (m)")
+        self.label2=QLabel("Précision (m)")
+        self.label3=QLabel("Masse (kg)")
         self.label = QTextEdit("calculs")
-
+        self.label11 = QLineEdit()
+        self.label22 = QLineEdit()
+        self.label33=QLineEdit()
         self.layout.addWidget(self.button1, 1, 1, 1, 2)
         self.layout.addWidget(self.button2, 1, 3, 1, 2)
         self.layout.addWidget(self.button3, 1, 5, 1, 2)
 
-        self.layout.addWidget(self.canvas,2,1,2,4)
-        self.layout.addWidget(self.label, 2, 5, 2, 2)
+        self.layout.addWidget(self.canvas,3,1,2,4)
+        self.layout.addWidget(self.label, 3, 5, 2, 2)
+        self.layout.addWidget(self.label1,2,1,1,1)
+        self.layout.addWidget(self.label11,2,2,1,1)
+
+        self.layout.addWidget(self.label2,2,3,1,1)
+        self.layout.addWidget(self.label22,2,4,1,1)
+
+        self.layout.addWidget(self.label3,2,5,1,1)
+        self.layout.addWidget(self.label33,2,6,1,1)
+
         self.button1.clicked.connect(self.clic)
+        self.button3.clicked.connect(self.cliccompute)
 
         self.setLayout(self.layout)
 
     def clic(self): #Afficher le Menu du Load Image
         win2.show()
 
+    def cliccompute(self):
+        if self.__fichier != None:
+            NiveauDeau = float(self.label11.text())
+            Precision = float(self.label22.text())
+            if self.label33.text() != '':
+                masse = float(self.label33.text())
+            else:
+                masse = None
+            listevalNiveauDeau, listeCalculNiveauDeau = dicho(Precision, self.__fichier, NiveauDeau, masse)
+            # mettre precision
+            self.label.setText("Niveau d'eau pour atteindre l'équilibre à" + "  precision m près" + str(
+                listevalNiveauDeau[-1]) + "mPour ce niveau d'eau, Pa-P=" + str(listeCalculNiveauDeau[1]))
+            ####LANCER LA DICHOTOMIE#"""
+
+
     def dessin(self):
         ax = Axes3D(self.fig) #erreur "unknown projection '3d'"
         #dessin 3d
-        your_mesh = mesh.Mesh.from_file('V_HULL_Normals_Outward.STL')
+        your_mesh = mesh.Mesh.from_file('V_HULL_Normals_Outward.stl')
         ax.add_collection3d(mplot3d.art3d.Poly3DCollection(your_mesh.vectors))
         scale = your_mesh.points.flatten(-1)
         ax.auto_scale_xyz(scale, scale, scale)
         self.canvas.draw()
+        fichiername='V_HULL_Normals_Outward.stl'
+        self.__fichier=fichiername
+
     def dessin2(self):
         ax = Axes3D(self.fig) #erreur "unknown projection '3d'"
         #dessin 3d
@@ -57,14 +89,19 @@ class Test(QWidget):
         scale = your_mesh.points.flatten(-1)
         ax.auto_scale_xyz(scale, scale, scale)
         self.canvas.draw()
+        fichiername='Rectangular_HULL_Normals_Outward.stl'
+        self.__fichier=fichiername
+
     def dessin3(self):
         ax = Axes3D(self.fig) #erreur "unknown projection '3d'"
         #dessin 3d
-        your_mesh = mesh.Mesh.from_file('Cylindrical_HULL_Normals_Outward.STL')
+        your_mesh = mesh.Mesh.from_file('Cylindrical_HULL_Normals_Outward.stl')
         ax.add_collection3d(mplot3d.art3d.Poly3DCollection(your_mesh.vectors))
         scale = your_mesh.points.flatten(-1)
         ax.auto_scale_xyz(scale, scale, scale)
         self.canvas.draw()
+        fichiername='Cylindrical_HULL_Normals_Outward.stl'
+        self.__fichier=fichiername
 
 
 class ButtonsPanel(QWidget):                 #Interface Menu du Load Image, on choisit laquelle
@@ -96,6 +133,7 @@ class ButtonsPanel(QWidget):                 #Interface Menu du Load Image, on c
         win.dessin2()
         self.confirm()
         win2.close()
+
     def interface3(self):
         win.dessin3()
         self.confirm()

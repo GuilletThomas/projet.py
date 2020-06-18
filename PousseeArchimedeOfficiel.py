@@ -1,9 +1,6 @@
-"""Ici on prend en compte le bon decoupage des triangles en fonction du niveau d'eau sans test de la norme"""
 from stl import mesh
 from mpl_toolkits import mplot3d
 from matplotlib import pyplot
-#"source: https://readthedocs.org/projects/numpy-stl/downloads/pdf/latest/"
-
 class Archimede:
     def __init__(self,massevolumique,fichier,hauteureau):
         self.__massevolumique=massevolumique
@@ -26,9 +23,11 @@ class Archimede:
         your_mesh = mesh.Mesh.from_file(monfichier)
         axes.add_collection3d(mplot3d.art3d.Poly3DCollection(your_mesh.vectors))
 
+        #obtenir la norme pour les triangles
         normal=your_mesh.normals
         #obtenir les trois coordonnées x,y,z des trois sommets du triangle
         a,b,c=your_mesh.v0, your_mesh.v1, your_mesh.v2
+
         nombredetriangle=len(a)
 
         #on parcourt notre fichier STL
@@ -64,7 +63,7 @@ class Archimede:
             ACy=c[i][1]-a[i][1]
             ACz=c[i][2]-a[i][2]
 
-            #mes resultats du produit vectoriel et ensuite je divise par deux (voir formule poussée d'archimede
+            #produit vectoriel AB^AC
             vectorielx=(ABy*ACz-ABz*ACy)
             vectoriely=(ABz*ACx-ABx*ACz)
             vectorielz=(ABx*ACy-ABy*ACx)
@@ -173,9 +172,15 @@ class Archimede:
 
         return Archimedex,Archimedey,Archimedez,compteur
 
-
     def TrouvecoordonneePourCouperLeTriangleAvecUnSommetDehors(self,A,B,C,pointsommet,I,Norme):
         hauteureau=self.__hauteureau
+
+        #vecteur unitaire du triangle ABC
+        lanormex=Norme[0]
+        lanormey=Norme[1]
+        lanormez=Norme[2]
+
+        #permet d'avoir le même triangle avec A sommet en haut, B côté droit en bas, C côté gauche en bas
         if pointsommet=='A':
             Xa=A[I][0]
             Ya=A[I][1]
@@ -213,13 +218,12 @@ class Archimede:
             Yc=B[I][1]
             Zc=B[I][2]
 
-        #ecrire la démo!!!!
-        #point E
+        #obtenir les coordonées du point E
         t1=(hauteureau-Za)/(Zb-Za)
         X1=Xa+t1*(Xb-Xa)
         Y1=Ya+t1*(Yb-Ya)
 
-        #point D
+        #obtenir les coordonées du point D
         t2=(hauteureau-Za)/(Zc-Za)
         X2=Xa+t2 *(Xc-Xa)
         Y2=Ya+t2*(Yc-Ya)
@@ -229,15 +233,16 @@ class Archimede:
         #E=X1,Y1,hauteureau
         #B=Xb,Yb,Zb
         #C=Xc,Yc,Zc
+
         centregraviteGzEBC=(hauteureau+Zb+Zc)/3
         ZFkEBC=centregraviteGzEBC-hauteureau
 
-        #trouver le vecteur EB
+        #vecteur EB
         EBx=Xb-X1
         EBy=Yb-Y1
         EBz=Zb-hauteureau
 
-        #trouver le vecteur EC
+        #vecteur EC
         ECx=Xc-X1
         ECy=Yc-Y1
         ECz=Zc-hauteureau
@@ -246,10 +251,6 @@ class Archimede:
         vectoriel1x=((EBy*ECz-EBz*ECy))
         vectoriel1y=((EBz*ECx-EBx*ECz))
         vectoriel1z=((EBx*ECy-EBy*ECx))
-
-        lanormex=Norme[0]
-        lanormey=Norme[1]
-        lanormez=Norme[2]
 
         normevectoriel1=((vectoriel1x**2)+(vectoriel1y**2)+(vectoriel1z)**2)**(1/2)
 
@@ -262,20 +263,21 @@ class Archimede:
         #C=Xc,Yc,Zc
         #D=X2,Y2,hauteureau
         #E=X1,Y1,hauteureau
+
         centregraviteGzCDE=(hauteureau+hauteureau+Zc)/3
         ZFkCDE=centregraviteGzCDE-hauteureau
 
-        #trouver le vecteur CE
+        #vecteur CE
         CEx=X1-Xc
         CEy=Y1-Yc
         CEz=hauteureau-Zc
 
-        #trouver le vecteur CD
+        #vecteur CD
         CDx=X2-Xc
         CDy=Y2-Yc
         CDz=hauteureau-Zc
 
-        #mes resultats du produit vectoriel  (voir formule poussée d'archimede) CE^CD
+        #produit vectoriel CE^CD
         vectoriel2x=((CEy*CDz-CEz*CDy))
         vectoriel2y=((CEz*CDx-CEx*CDz))
         vectoriel2z=((CEx*CDy-CEy*CDx))
@@ -290,6 +292,13 @@ class Archimede:
 
     def TrouvecoordonneePourCouperLeTriangleAvecDeuxSommetsDehors(self,A,B,C,pointsommet1,pointsommet2,I,Norme):
         hauteureau=self.__hauteureau
+
+        #vecteur unitaire du triangle ABC
+        lanormex=Norme[0]
+        lanormey=Norme[1]
+        lanormez=Norme[2]
+
+        #permet d'avoir le même triangle avec A sommet en bas, B côté gauche en haut, C côté droit en haut
         if pointsommet1=='A' and pointsommet2=='B':
             Xa=C[I][0]
             Ya=C[I][1]
@@ -327,12 +336,12 @@ class Archimede:
             Yc=A[I][1]
             Zc=A[I][2]
 
-        #point E
+        #point D
         t1=(hauteureau-Za)/(Zb-Za)
         X1=Xa+t1*(Xb-Xa)
         Y1=Ya+t1*(Yb-Ya)
 
-        #point D
+        #point E
         t2=(hauteureau-Za)/(Zc-Za)
         X2=Xa+t2*(Xc-Xa)
         Y2=Ya+t2*(Yc-Ya)
@@ -344,21 +353,17 @@ class Archimede:
         centregraviteGzAED=(Za+hauteureau+hauteureau)/3
         ZFkAED=centregraviteGzAED-hauteureau
 
-        #trouver le vecteur AD
+        #vecteur AD
         ADx=X1-Xa
         ADy=Y1-Ya
         ADz=hauteureau-Za
 
-        #trouver le vecteur AE
+        #vecteur AE
         AEx=X2-Xa
         AEy=Y2-Ya
         AEz=hauteureau-Za
 
-        lanormex=Norme[0]
-        lanormey=Norme[1]
-        lanormez=Norme[2]
-
-        #mes resultats du produit vectoriel et ensuite je divise par deux (voir formule poussée d'archimede)
+        #produit vectoriel AD^AE
         vectorielx=((ADy*AEz-ADz*AEy))
         vectoriely=((ADz*AEx-ADx*AEz))
         vectorielz=((ADx*AEy-ADy*AEx))
@@ -371,11 +376,3 @@ class Archimede:
 
 
         return resultatx,resultaty,resultatz
-
-#massevolumique,fichier,hauteureau
-calcularchimede=Archimede(1000,'V_HULL_Normals_Outward.STL',0.5)
-liste=calcularchimede.calcul()
-print("poussee d'archimede:")
-print("x:",liste[0],"N,","y:",liste[1],'N,',"z:",liste[2],'N')
-
-"""Ici on prend en compte le bon decoupage des triangles en fonction du niveau d'eau sans test de la norme"""
