@@ -54,53 +54,57 @@ class Test(QWidget):
 
     def clic(self): #Afficher le Menu du Load Image
         win2.show()
-
     def cliccompute(self):
-        if self.__fichier != None:
-            NiveauDeau = float(self.label11.text())
-            Precision = float(self.label22.text())
-            if self.label33.text() != '':
-                masse = float(self.label33.text())
+        NiveauDeau=float(self.label11.text())
+        Precision=float(self.label22.text())
+        if NiveauDeau<0 or NiveauDeau>1:  #L'eau doit être comprise entre ces deux niveaux, sinon on demande un nouvel input
+            self.label11.setText("Doit être compris entre 0 et 1")
+        if Precision<0:
+            self.label22.setText("Doit être >0")
+        else:
+            self.cliccompute2()
+    def cliccompute2(self):
+        if self.__fichier!=None:
+            Precision=float(self.label22.text())
+            NiveauDeau=float(self.label11.text())
+            if self.label33.text()!='':
+                masse=float(self.label33.text())
             else:
-                masse = None
-            listevalNiveauDeau, listeCalculNiveauDeau = dicho(Precision, self.__fichier, NiveauDeau, masse)
-            # mettre precision
-            self.label.setText("Niveau d'eau pour atteindre l'équilibre à" + "  precision m près" + str(
-                listevalNiveauDeau[-1]) + "mPour ce niveau d'eau, Pa-P=" + str(listeCalculNiveauDeau[1]))
-            ####LANCER LA DICHOTOMIE#"""
+                masse=None
 
+            listevalNiveauDeau,listeCalculNiveauDeau=dicho(Precision,self.__fichier,NiveauDeau,masse)
+            #mettre precision
+            self.label.setText("Niveau d'eau pour atteindre l'équilibre à "+ str(Precision) +" m près "+str(listevalNiveauDeau[-1])+"m. Pour ce niveau d'eau, Pa-P="+str(listeCalculNiveauDeau[1]))
 
     def dessin(self):
         ax = Axes3D(self.fig) #erreur "unknown projection '3d'"
         #dessin 3d
-        your_mesh = mesh.Mesh.from_file('V_HULL_Normals_Outward.stl')
+        your_mesh = mesh.Mesh.from_file('V_HULL_Normals_Outward.STL')
         ax.add_collection3d(mplot3d.art3d.Poly3DCollection(your_mesh.vectors))
         scale = your_mesh.points.flatten(-1)
         ax.auto_scale_xyz(scale, scale, scale)
         self.canvas.draw()
-        fichiername='V_HULL_Normals_Outward.stl'
+        fichiername='V_HULL_Normals_Outward.STL'
         self.__fichier=fichiername
-
     def dessin2(self):
         ax = Axes3D(self.fig) #erreur "unknown projection '3d'"
         #dessin 3d
-        your_mesh = mesh.Mesh.from_file('Rectangular_HULL_Normals_Outward.stl')
+        your_mesh = mesh.Mesh.from_file('Rectangular_HULL_Normals_Outward.STL')
         ax.add_collection3d(mplot3d.art3d.Poly3DCollection(your_mesh.vectors))
         scale = your_mesh.points.flatten(-1)
         ax.auto_scale_xyz(scale, scale, scale)
         self.canvas.draw()
-        fichiername='Rectangular_HULL_Normals_Outward.stl'
+        fichiername='Rectangular_HULL_Normals_Outward.STL'
         self.__fichier=fichiername
-
     def dessin3(self):
         ax = Axes3D(self.fig) #erreur "unknown projection '3d'"
         #dessin 3d
-        your_mesh = mesh.Mesh.from_file('Cylindrical_HULL_Normals_Outward.stl')
+        your_mesh = mesh.Mesh.from_file('Cylindrical_HULL_Normals_Outward.STL')
         ax.add_collection3d(mplot3d.art3d.Poly3DCollection(your_mesh.vectors))
         scale = your_mesh.points.flatten(-1)
         ax.auto_scale_xyz(scale, scale, scale)
         self.canvas.draw()
-        fichiername='Cylindrical_HULL_Normals_Outward.stl'
+        fichiername='Cylindrical_HULL_Normals_Outward.STL'
         self.__fichier=fichiername
 
 
