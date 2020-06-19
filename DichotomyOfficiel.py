@@ -1,28 +1,31 @@
 import numpy
 from PousseeArchimedeOfficiel import *
 
+
 def Volume(fichier):
-    if fichier == 'Cylindrical_HULL_Normals_Outward.stl':
+    if fichier == 'Cylindrical_HULL_Normals_Outward.STL':
         rayon = 1
         hauteur = 4
         newVolume = numpy.pi * (rayon**2) * hauteur
-        return newVolume
 
-    elif fichier == 'V_HULL_Normals_Outward.stl':
+    elif fichier == 'V_HULL_Normals_Outward.STL':
         longueur = 4
         largeur = 2
         hauteur = 1
         newVolume = longueur * largeur * hauteur/2
-        return newVolume
-    elif fichier == 'Rectangular_HULL_Normals_Outward.stl':
+    elif fichier == 'Rectangular_HULL_Normals_Outward.STL':
         longueur = 4
         largeur = 2
         hauteur = 1
         newVolume = (longueur * largeur * hauteur)
-        return newVolume
+
+    else :
+        your_mesh = mesh.Mesh.from_file(fichier)
+        newVolume, cog, inertia = your_mesh.get_mass_properties()
+    return newVolume
 
 
-def dicho(precision,fichier,zm,masse):
+def dicho(precision,fichier,zm,masse,zb):
     if masse==None:
         poids=1000*Volume(fichier)
     else:
@@ -31,17 +34,18 @@ def dicho(precision,fichier,zm,masse):
     listevalNiveauDeau=[] #Stock tous les niveaux d'eau jusqu'à atteindre le niveau d'équilibre
     listeCalculNiveauDeau=[] #Stock respectivement le calcul Pa-P associé à chaque niveau
     za=0 #Valeur minimum de l'eau
-    zb=1 #Valeur Max de l'eau
+    """
     while zm<za or zm>zb:  #L'eau doit être comprise entre ces deux niveaux, sinon on demande un nouvel input
         print("Erreur, Le niveau d'eau doit être compris entre 0 et 1.","\nEntrez à nouveau zm")
         zm=float(input("Entrez valeur niveau d'eau en mètre >"))
+        """
     zmcalcul=Archimede(1000, fichier, zm).calcul() #Archimede renvoit les composantes X Y Z, on va donc prendre l'index 2 pour obtenir composante Z
     if zmcalcul[2]<poids:
-        print("Pas d'équilibre, le bateau tend à s'enfoncer")
+        chaine=("Equilibrium state not reached for this water level, the boat tends to sink into the water")
     elif zmcalcul[2]>poids:
-        print("Pas d'équilibre, le bateau tend à sortir de l'eau")
+        chaine=("Equilibrium state not reached for this water level, the boat tends to get out of the water")
     else :
-        print("Equilibre atteint")
+        chaine=("Equilibrium state reached for this water level")
         return #Arret de la fonction car l'équilibre a été trouvé directement par l'utilisateur
 
     a=Archimede(1000, fichier, za).calcul()
@@ -65,5 +69,6 @@ def dicho(precision,fichier,zm,masse):
         avalue=a[2]-poids
         listevalNiveauDeau.append(zm)              #On recupere tous les niveaux d'eau
         listeCalculNiveauDeau.append(MilieuValeur) #Et leur Pa-P correspondant
-    return listevalNiveauDeau,listeCalculNiveauDeau
+
+    return listevalNiveauDeau,listeCalculNiveauDeau,chaine,poids
 
