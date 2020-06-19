@@ -2,7 +2,7 @@ import numpy
 from PousseeArchimedeOfficiel import *
 
 
-def Volume(fichier):
+def Volume(fichier):  #Permet de récupérer le volume du fichier quelque soit son nom. Au début effectuée pour des fichiers précis, puis généralisée pour les derniers fichiers dont le calcul du volume est + complexe
     if fichier == 'Cylindrical_HULL_Normals_Outward.STL':
         rayon = 1
         hauteur = 4
@@ -25,11 +25,11 @@ def Volume(fichier):
     return newVolume
 
 
-def dicho(precision,fichier,zm,masse,zb):
+def dicho(precision,fichier,zm,masse,zb): #Va nous permettre de trouver quand la fonction Pa(z)-P s'approche de 0 = état d'équilibre atteint (en fonction de la précision rentrée par l'utilisateur)
     if masse==None:
-        poids=1000*Volume(fichier)
+        poids=1000*Volume(fichier)   #Si l'utilisateur ne rentre pas de masse, on calculera automatiquement le poids grâce au volume du fichier*masse volumique de l'eau
     else:
-        poids=masse*9.81
+        poids=masse*9.81 #Si une masse est entrée, on calcule le poids grâce à P=mg
 
     listevalNiveauDeau=[] #Stock tous les niveaux d'eau jusqu'à atteindre le niveau d'équilibre
     listeCalculNiveauDeau=[] #Stock respectivement le calcul Pa-P associé à chaque niveau

@@ -85,16 +85,26 @@ class Test(QWidget):
 
     def clic(self): #Afficher le Menu du Load Image
         win2.show()
-    def cliccompute(self):
+    def cliccompute(self):         #On verifie la cohérence des données entrées
         if self.__fichier!=None:
-            NiveauDeau=float(self.label11.text())
-            Precision=float(self.label22.text())
-            if NiveauDeau<0 or NiveauDeau>self.__zb:  #L'eau doit être comprise entre ces deux niveaux, sinon on demande un nouvel input
-                self.label11.setText("Must be between 0 and "+str(self.__zb)+" m")
-            if Precision<0:
-                self.label22.setText("Must be >0")
-            else:
-                self.cliccompute2()
+            if self.label11.text()=="" and self.label22.text()=="":
+                self.label11.setText("Must be completed")
+                self.label22.setText("Must be completed")
+            elif self.label11.text()=="" and self.label22.text()!="":
+                self.label11.setText("Must be completed")
+            elif self.label11.text()!="" and self.label22.text()=="":
+                self.label22.setText("Must be completed")
+            else :
+                NiveauDeau=float(self.label11.text())
+                Precision=float(self.label22.text())
+                if NiveauDeau<0 or NiveauDeau>self.__zb:  #L'eau doit être comprise entre ces deux niveaux, sinon on demande un nouvel input
+                    self.label11.setText("Must be between 0 and "+str(self.__zb)+" m")
+                if Precision<0:
+                    self.label22.setText("Must be >0")
+                else:
+                    self.cliccompute2()    #Si ces données sont bonnes on lance la suite du programme
+        else :
+            self.notif("Please load a 3D Model before")
     def cliccompute2(self):
         if self.__fichier!=None:
             Precision=float(self.label22.text())
@@ -105,17 +115,17 @@ class Test(QWidget):
                 masse=None
             #fichier=str(self.__fichier)
             listevalNiveauDeau,listeCalculNiveauDeau,chaine,poids=dicho(Precision,self.__fichier,NiveauDeau,masse,self.__zb)
-            self.ax2.plot(np.arange(1,len(listeCalculNiveauDeau)+1),listeCalculNiveauDeau)
+            self.ax2.plot(np.arange(1,len(listeCalculNiveauDeau)+1),listeCalculNiveauDeau) #On génère le graphique de la résultante des forces en fonction du nb d'itération
             self.ax2.scatter(np.arange(1,len(listeCalculNiveauDeau)+1),listeCalculNiveauDeau, color = 'blue')
             self.canvas2d.draw()
-            NiveauDeauArrondi=int(listevalNiveauDeau[-1]*10**3)*10**-3
-            self.ax3.plot(np.arange(1,len(listevalNiveauDeau)+1),listevalNiveauDeau)
-            self.ax3.scatter(np.arange(1,len(listevalNiveauDeau)+1),listevalNiveauDeau, color = 'blue')
+            NiveauDeauArrondi=int(listevalNiveauDeau[-1]*10**3)*10**-3  #Pour arrondir la valeur du niveau d'eau, car beaucoup de chiffres significatifs dus à la dichotomie
+            self.ax3.bar(np.arange(1,len(listevalNiveauDeau)+1),listevalNiveauDeau,width=0.1) #On génère le graphique des niveaux d'eau calculés au cours de la dichotomie en fonction du nb d'itération
             self.canvasniveaueau.draw()
             self.label.setText("For a weight of "+str(poids)+" N, "+chaine+". The water level to reach the equilibrium state with an accuracy of "+ str(Precision) +" m is "+str(NiveauDeauArrondi)+"m. For this level z, the Net force is equal to Pa(z)-P="+str(listeCalculNiveauDeau[1])+" N")
-            self.Update3D()
-
-    def Update3D(self): #Mettre à jour les couleurs du stl selon le niveau de l'eau calculé
+            #self.Update3D()
+            #Fonction Update 3D, idée qui permettrait de colorier différemment les parties du bateau en dehors et sous l'eau
+    """
+    def Update3D(self): 
         ax = Axes3D(self.fig)
         your_mesh = mesh.Mesh.from_file(self.__fichier)
         print(your_mesh)
@@ -124,18 +134,22 @@ class Test(QWidget):
         scale = your_mesh.points.flatten(-1)
         ax.auto_scale_xyz(scale, scale, scale)
         self.canvas.draw()
-
-    def save(self):
+        """
+    def save(self):   #Permet de sauvegarder les graphs sur clique du bouton Save Graphs
         if self.__fichier!=None:
             self.fig.savefig(self.__fichier+"3D_Visualization.png")
             self.fig2d.savefig(self.__fichier+"Net_Force.png")
-            self.figniveaueau.savefig(self.file+"Water_Level.png")
+            self.figniveaueau.savefig(self.__fichier+"Water_Level.png")
+            self.notif("Graphs successfully saved")
         else:
+            self.notif("You can not save empty graphs")
+    def notif(self,text):
             self.Notif=QMessageBox()
             self.Notif.setWindowTitle("Info") ##########
-            self.Notif.setText("You can not save empty graphs")
+            self.Notif.setText(text)
             self.Notif.exec_()
-    def dessin(self):
+
+    def dessin(self): #Code des fonctions dessinX à optimiser. #Permet de charger le STL 3D respectif à celui choisi
         file="V"
         ax = Axes3D(self.fig) #erreur "unknown projection '3d'"
         ax.set_title(file+" Visualization",fontweight='bold',fontsize=14)
@@ -258,7 +272,7 @@ class Test(QWidget):
         self.__fichier=str(fichiername)
         self.buttonfilename.setText(file)
         self.__zb=400
-class ButtonsPanel(QWidget):                 #Interface Menu du Load Image, on choisit laquelle
+class ButtonsPanel(QWidget):                 #Interface Menu du Load Image, on choisit le 3D Model
     def __init__(self):
         QWidget.__init__(self)
         self.setWindowTitle("Model Choice")
@@ -294,7 +308,7 @@ class ButtonsPanel(QWidget):                 #Interface Menu du Load Image, on c
         self.Notif.setText(text)
         self.Notif.exec_()
 
-    def interface1(self):                        #Si on Load l'interface 1
+    def interface1(self):                        #Si on Load l'interface 1, => fonction dessin qui ouvrira le STL + fonction confirm qui envoie une notification de confirmation
         win.dessin()
         self.confirm("Interface successfully loaded")
         win2.close()
